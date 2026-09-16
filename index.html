@@ -184,7 +184,7 @@
             <option value="1">1 Fila</option><option value="2">2 Filas</option><option value="3">3 Filas</option><option value="4">4 Filas</option><option value="5">5 Filas</option><option value="6">6 Filas</option>
         </select>
     </div>
-    <div class="editor-row"><span>Ciudad:</span><input type="text" id="inputCity" onchange="updateSettings()"></div>
+    <div class="editor-row"><span>Ciudad:</span><input type="text" id="inputCity" placeholder="Ej: Madrid, Tokio..." onchange="updateSettings()"></div>
     <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
     <div class="editor-row"><span>Buscador:</span><input type="checkbox" id="checkSearch" onchange="updateSettings()"></div>
     <div class="editor-row"><span>Clima:</span><input type="checkbox" id="checkWeather" onchange="updateSettings()"></div>
@@ -228,9 +228,10 @@
         {name: 'YouTube', links: [{label: 'YouTube', url: 'https://youtube.com'}]}
     ];
 
+    // Sin ciudad por defecto inicial en el código
     let config = JSON.parse(localStorage.getItem(STORAGE_CONFIG)) || { 
         text: 'START IN', font: "'Orbitron', sans-serif", color: '#ffffff', anim: 'anim-glow', 
-        rows: 2, city: 'Barcelona', showSearch: true, showWeather: true 
+        rows: 2, city: '', showSearch: true, showWeather: true 
     };
 
     function render() {
@@ -319,7 +320,7 @@
         document.getElementById('inputTitleText').value = config.text;
         document.getElementById('selectAnim').value = config.anim;
         document.getElementById('selectRows').value = config.rows;
-        document.getElementById('inputCity').value = config.city;
+        document.getElementById('inputCity').value = config.city || '';
         document.getElementById('checkSearch').checked = config.showSearch;
         document.getElementById('checkWeather').checked = config.showWeather;
         document.getElementById('inputColor').value = config.color;
@@ -332,7 +333,7 @@
             color: document.getElementById('inputColor').value,
             anim: document.getElementById('selectAnim').value,
             rows: parseInt(document.getElementById('selectRows').value),
-            city: document.getElementById('inputCity').value,
+            city: document.getElementById('inputCity').value.trim(),
             showSearch: document.getElementById('checkSearch').checked,
             showWeather: document.getElementById('checkWeather').checked
         };
@@ -374,6 +375,7 @@
                     mySites = importedData.sites;
                     config = importedData.config;
                     render();
+                    updateWeather();
                     alert("¡Configuración importada con éxito!");
                 } else {
                     alert("El archivo JSON no tiene el formato correcto.");
@@ -393,13 +395,45 @@
     function executeSearch() { const engine = document.getElementById('searchEngine').value; const query = document.getElementById('searchInput').value; if(query) window.location.href = engine + encodeURIComponent(query); }
     
     async function updateWeather() { 
-        if(!config.showWeather || !config.city) return; 
+        if(!config.showWeather) return; 
+
+        // Si el usuario especificó una ciudad manualmente, la usamos directamente
+        if(config.city) {
+            fetchWeatherByCity(config.city);
+            return;
+        }
+
+        // Si no hay ciudad especificada, intenta geolocalizar la posición actual del navegador
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    try {
+                        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                        const weatherData = await weatherRes.json();
+                        document.getElementById('weather').innerText = `MI UBICACIÓN 🌤️ ${Math.round(weatherData.current_weather.temperature)}°C`;
+                    } catch(e) {
+                        document.getElementById('weather').innerText = '';
+                    }
+                },
+                () => {
+                    // Si el usuario deniega la geolocalización, simplemente ocultamos el texto
+                    document.getElementById('weather').innerText = '';
+                }
+            );
+        } else {
+            document.getElementById('weather').innerText = '';
+        }
+    }
+
+    async function fetchWeatherByCity(city) {
         try { 
-            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(config.city)}&count=1&language=es&format=json`);
+            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=es&format=json`);
             const geoData = await geoRes.json();
             
             if(!geoData.results || geoData.results.length === 0) {
-                document.getElementById('weather').innerText = config.city.toUpperCase();
+                document.getElementById('weather').innerText = city.toUpperCase();
                 return;
             }
 
@@ -410,7 +444,7 @@
             
             document.getElementById('weather').innerText = `${name.toUpperCase()} 🌤️ ${Math.round(weatherData.current_weather.temperature)}°C`; 
         } catch (e) { 
-            document.getElementById('weather').innerText = config.city.toUpperCase(); 
+            document.getElementById('weather').innerText = city.toUpperCase(); 
         } 
     }
 
