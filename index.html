@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>START IN</title>
-    <!-- FAVICON: Cambia 'TU_FAVICON.ico' por la URL o archivo de tu icono -->
     <link rel="icon" type="image/x-icon" href="TU_FAVICON.ico">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <style>
-        /* Tipografías: Orbitron e Inter */
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;900&display=swap');
+    
+    <!-- Carga optimizada de fuentes sin bloquear el renderizado -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
+    <!-- Script de arrastrar diferido -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" defer></script>
+
+    <style>
         :root {
             --glass: rgba(255, 255, 255, 0.1);
             --glass-border: rgba(255, 255, 255, 0.2);
@@ -20,9 +24,9 @@
         }
 
         body {
-            margin: 0; font-family: 'Inter', sans-serif; color: white; min-height: 100vh;
+            margin: 0; font-family: 'Inter', system-ui, sans-serif; color: white; min-height: 100vh;
             background: #0a0a0a no-repeat center center fixed; background-size: cover;
-            overflow-x: hidden; transition: background-image 0.5s ease-in-out;
+            overflow-x: hidden; transition: background-image 0.3s ease-in-out;
         }
 
         body::before {
@@ -32,7 +36,7 @@
 
         header { padding: 15px 50px; display: flex; justify-content: space-between; align-items: flex-start; }
         .time-container { display: flex; flex-direction: column; align-items: center; text-align: center; }
-        #clock { font-size: 2.2rem; font-weight: 400; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-family: 'Orbitron', sans-serif; }
+        #clock { font-size: 2.2rem; font-weight: 400; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-family: 'Orbitron', monospace; }
         #date { font-size: 0.9rem; opacity: 0.8; margin-top: 4px; text-transform: capitalize; }
 
         .right-header { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
@@ -47,7 +51,7 @@
         .action-btn { 
             padding: 10px 20px; border-radius: 30px; border: 1px solid var(--glass-border); 
             background: var(--glass); color: white; cursor: pointer; font-weight: bold; 
-            font-size: 0.85rem; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+            font-size: 0.85rem; transition: 0.2s; display: flex; align-items: center; gap: 8px;
             backdrop-filter: blur(15px); box-sizing: border-box; width: auto;
         }
         .action-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); border-color: var(--accent); }
@@ -56,7 +60,7 @@
         .search-wrapper {
             display: flex; align-items: center; background: var(--glass); 
             backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
-            border-radius: 50px; padding: 5px 15px; width: 550px; transition: 0.3s;
+            border-radius: 50px; padding: 5px 15px; width: 550px; transition: 0.2s;
         }
         .search-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 15px rgba(0,210,255,0.2); }
         .search-engine-select {
@@ -66,8 +70,8 @@
         .search-engine-select option { background: #1a1a1a; color: white; }
         .search-wrapper input { background: transparent; border: none; color: white; padding: 12px; flex-grow: 1; outline: none; font-size: 1rem; }
 
-        .main-container { width: 95%; max-width: 1450px; margin: 0 auto; padding-bottom: 50px; transition: 0.4s; }
-        #mainTitle { font-size: 4rem; text-align: center; margin: 20px 0; transition: 0.3s; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+        .main-container { width: 95%; max-width: 1450px; margin: 0 auto; padding-bottom: 50px; }
+        #mainTitle { font-size: 4rem; text-align: center; margin: 20px 0; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
 
         .shortcuts-grid { display: grid; grid-template-columns: repeat(11, minmax(90px, 1fr)); gap: 28px; justify-content: center; width: 100%; box-sizing: border-box; }
 
@@ -84,8 +88,7 @@
         }
         
         .dropdown-menu::before { content: ""; position: absolute; top: -15px; left: 0; width: 100%; height: 15px; }
-
-        .item:hover .dropdown-menu { display: block; animation: fadeIn 0.15s ease-out; }
+        .item:hover .dropdown-menu { display: block; }
         
         .dropdown-item {
             padding: 10px 15px; font-size: 0.85rem; color: white; text-decoration: none;
@@ -93,14 +96,14 @@
         }
         .dropdown-item:hover { background: var(--accent); color: black; font-weight: bold; }
 
-        .item-tools { position: absolute; top: -10px; right: 0; display: flex; gap: 5px; opacity: 0; transition: 0.3s; z-index: 100; }
+        .item-tools { position: absolute; top: -10px; right: 0; display: flex; gap: 5px; opacity: 0; transition: 0.2s; z-index: 100; }
         .item:hover .item-tools { opacity: 1; }
 
-        .tool-btn { width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: 0.2s; }
+        .tool-btn { width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .btn-edit { background: var(--accent); }
         .btn-del { background: var(--danger); }
 
-        .icon-wrapper { width: 90px; height: 90px; background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 22px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; transition: 0.3s; flex-shrink: 0; pointer-events: none; font-size: 2rem; font-weight: bold; color: var(--accent); overflow: hidden; padding: 0; }
+        .icon-wrapper { width: 90px; height: 90px; background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 22px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; transition: 0.2s; flex-shrink: 0; pointer-events: none; font-size: 2rem; font-weight: bold; color: var(--accent); overflow: hidden; padding: 0; }
         .item:hover .icon-wrapper { background: rgba(255,255,255,0.25); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .icon-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; }
         .item span { font-size: 0.85rem; font-weight: 500; width: 100%; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
@@ -124,8 +127,6 @@
         
         .sub-link-row { display: flex; gap: 5px; margin-bottom: 8px; width: 100%; box-sizing: border-box; }
         .sub-link-row input { background: #222; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px; font-size: 0.8rem; box-sizing: border-box; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(5px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
     </style>
 </head>
 <body id="bodyBg">
@@ -159,10 +160,10 @@
 <header>
     <div class="time-container">
         <div id="clock">00:00</div>
-        <div id="date">Cargando...</div>
+        <div id="date">--</div>
     </div>
     <div class="right-header">
-        <div id="weather" style="display: none;">...</div>
+        <div id="weather" style="display: none;"></div>
         <button class="action-btn" onclick="toggleConfig()"><span>⚙️</span> Personalizar</button>
     </div>
 </header>
@@ -192,7 +193,6 @@
     <button class="action-btn" style="width:100%; margin-bottom: 10px; justify-content: center; border-color: var(--accent);" onclick="openBgModal()">🖼️ Cambiar Fondo</button>
     <button class="action-btn" style="width:100%; border-color: var(--success); color: var(--success); margin-bottom: 15px; justify-content: center;" onclick="openAddModal()">+ Nuevo Sitio</button>
     
-    <!-- Botones de Copia de Seguridad -->
     <div style="display: flex; gap: 8px; margin-bottom: 15px;">
         <button class="action-btn" style="flex: 1; justify-content: center; font-size: 0.75rem;" onclick="exportData()">📥 Exportar</button>
         <label for="importInput" class="action-btn" style="flex: 1; justify-content: center; font-size: 0.75rem; cursor: pointer;">📤 Importar</label>
@@ -238,6 +238,8 @@
         grid.innerHTML = '';
         applyConfig();
         const totalSlots = config.rows * 11;
+        const fragment = document.createDocumentFragment();
+
         for(let i = 0; i < totalSlots; i++) {
             const site = mySites[i];
             const item = document.createElement('div');
@@ -248,7 +250,6 @@
                 const primaryUrl = site.links[0].url;
                 let domain = "google.com"; try { domain = new URL(primaryUrl).hostname; } catch(e) {}
                 let dropdownHtml = site.links.length > 1 ? `<div class="dropdown-menu">${site.links.map(link => `<a href="${link.url}" class="dropdown-item">${link.label}</a>`).join('')}</div>` : '';
-                
                 const fallbackLetter = site.name.charAt(0).toUpperCase();
 
                 item.innerHTML = `
@@ -258,7 +259,7 @@
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:100%;" onclick="if(${site.links.length} === 1) window.location.href='${primaryUrl}'">
                         <div class="icon-wrapper">
-                            <img src="https://www.google.com/s2/favicons?sz=128&domain=${domain}" loading="lazy" onerror="this.remove(); this.parentElement.innerText='${fallbackLetter}';">
+                            <img src="https://www.google.com/s2/favicons?sz=128&domain=${domain}" loading="lazy" decoding="async" onerror="this.remove(); this.parentElement.innerText='${fallbackLetter}';">
                         </div>
                         <span>${site.name}</span>
                     </div>
@@ -267,24 +268,26 @@
                 item.className += ' no-drag';
                 item.innerHTML = `<div style="opacity:0.2; cursor:pointer;" onclick="openAddModal()"><div class="icon-wrapper" style="border-style:dashed">+</div><span>Añadir</span></div>`;
             }
-            grid.appendChild(item);
+            fragment.appendChild(item);
         }
+        grid.appendChild(fragment);
         initSortable();
     }
 
     function initSortable() {
-        new Sortable(document.getElementById('grid'), {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            filter: '.no-drag',
-            onEnd: function() {
-                const items = Array.from(document.getElementById('grid').querySelectorAll('.item[data-id]'));
-                const newOrder = items.map(el => mySites[parseInt(el.getAttribute('data-id'))]);
-                mySites = newOrder;
-                localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites));
-                render();
-            }
-        });
+        if(typeof Sortable !== 'undefined') {
+            new Sortable(document.getElementById('grid'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                filter: '.no-drag',
+                onEnd: function() {
+                    const items = Array.from(document.getElementById('grid').querySelectorAll('.item[data-id]'));
+                    mySites = items.map(el => mySites[parseInt(el.getAttribute('data-id'))]);
+                    localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites));
+                    render();
+                }
+            });
+        }
     }
 
     function addLinkRow(label = '', url = '') {
@@ -345,18 +348,13 @@
     }
 
     function exportData() {
-        const exportObj = {
-            sites: mySites,
-            config: config,
-            customBg: localStorage.getItem('customBg') || null
-        };
+        const exportObj = { sites: mySites, config: config, customBg: localStorage.getItem('customBg') || null };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
         downloadAnchor.setAttribute("download", "start_in_backup.json");
         document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
+        downloadAnchor.click(); downloadAnchor.remove();
     }
 
     function importData(input) {
@@ -373,18 +371,12 @@
                         localStorage.setItem('customBg', importedData.customBg);
                         document.body.style.backgroundImage = `url(${importedData.customBg})`;
                     }
-                    mySites = importedData.sites;
-                    config = importedData.config;
+                    mySites = importedData.sites; config = importedData.config;
                     localStorage.removeItem('MyDash_WeatherData');
-                    render();
-                    updateWeather();
-                    alert("¡Configuración importada con éxito!");
-                } else {
-                    alert("El archivo JSON no tiene el formato correcto.");
+                    render(); updateWeather();
+                    alert("¡Configuración importada!");
                 }
-            } catch (err) {
-                alert("Error al leer el archivo de copia de seguridad.");
-            }
+            } catch (err) { alert("Error en la copia."); }
         };
         reader.readAsText(file);
     }
@@ -404,8 +396,7 @@
         const cachedData = localStorage.getItem(CACHE_KEY);
         const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
         
-        // Usa la caché local si no han pasado más de 20 minutos (1200000 ms)
-        if (cachedData && cachedTime && (Date.now() - cachedTime < 1200000)) {
+        if (cachedData && cachedTime && (Date.now() - cachedTime < 1800000)) {
             document.getElementById('weather').innerText = cachedData;
             return;
         }
@@ -415,24 +406,18 @@
         } else if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
                     try {
-                        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                        const weatherData = await weatherRes.json();
-                        const weatherText = `MI UBICACIÓN 🌤️ ${Math.round(weatherData.current_weather.temperature)}°C`;
+                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&current_weather=true`);
+                        const data = await res.json();
+                        const weatherText = `MI UBICACIÓN 🌤️ ${Math.round(data.current_weather.temperature)}°C`;
                         document.getElementById('weather').innerText = weatherText;
                         localStorage.setItem(CACHE_KEY, weatherText);
                         localStorage.setItem(CACHE_TIME_KEY, Date.now());
-                    } catch(e) {
-                        document.getElementById('weather').innerText = '';
-                    }
+                    } catch(e) { document.getElementById('weather').innerText = ''; }
                 },
                 () => { document.getElementById('weather').innerText = ''; },
-                { timeout: 3000 }
+                { timeout: 2000 }
             );
-        } else {
-            document.getElementById('weather').innerText = '';
         }
     }
 
@@ -440,11 +425,7 @@
         try { 
             const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=es&format=json`);
             const geoData = await geoRes.json();
-            
-            if(!geoData.results || geoData.results.length === 0) {
-                document.getElementById('weather').innerText = city.toUpperCase();
-                return;
-            }
+            if(!geoData.results || geoData.results.length === 0) return;
 
             const { latitude, longitude, name } = geoData.results[0];
             const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
@@ -454,24 +435,25 @@
             document.getElementById('weather').innerText = weatherText; 
             localStorage.setItem('MyDash_WeatherData', weatherText);
             localStorage.setItem('MyDash_WeatherTime', Date.now());
-        } catch (e) { 
-            document.getElementById('weather').innerText = city.toUpperCase(); 
-        } 
+        } catch (e) {} 
     }
 
     function removeSite(e, i) { e.stopPropagation(); if(confirm("¿Eliminar?")) { mySites.splice(i, 1); localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites)); render(); } }
-    function updateTime() { const now = new Date(); document.getElementById('clock').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); document.getElementById('date').textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }); }
+    function updateTime() { 
+        const now = new Date(); 
+        document.getElementById('clock').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); 
+        document.getElementById('date').textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }); 
+    }
 
-    // Renderizado ultrarrápido inicial
+    // Inicialización instantánea
     const savedBg = localStorage.getItem('customBg'); 
     if(savedBg) document.body.style.backgroundImage = `url(${savedBg})`;
 
     updateTime(); 
     render(); 
 
-    // Tareas diferidas en segundo plano para no bloquear el inicio
     setInterval(updateTime, 1000); 
-    setTimeout(updateWeather, 100);
+    setTimeout(updateWeather, 200);
 </script>
 </body>
 </html>
