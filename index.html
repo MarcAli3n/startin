@@ -92,8 +92,11 @@
 
         .shortcuts-grid { display: grid; grid-template-columns: repeat(11, minmax(90px, 1fr)); gap: 28px; justify-content: center; width: 100%; box-sizing: border-box; }
 
-        .item { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center; padding-bottom: 15px; cursor: grab; }
-        .item:active { cursor: grabbing; }
+        /* Cursor pointer por defecto para evitar la mano fija */
+        .item { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center; padding-bottom: 15px; cursor: pointer; }
+        
+        /* Cursor de mano agarrando solo mientras se mantiene presionado y arrastra */
+        .sortable-drag { cursor: grabbing !important; }
         .sortable-ghost { opacity: 0.3; }
 
         .dropdown-menu {
@@ -117,7 +120,7 @@
         .item:hover .item-tools { opacity: 1; }
 
         .tool-btn { width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .btn-edit { background: var(--accent); }
+        .btn-edit { background: var(--accent); color: black; }
         .btn-del { background: var(--danger); }
 
         .icon-wrapper { width: 90px; height: 90px; background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 22px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; transition: 0.2s; flex-shrink: 0; pointer-events: none; font-size: 2rem; font-weight: bold; color: var(--accent); overflow: hidden; padding: 0; }
@@ -160,8 +163,9 @@
         <label style="font-size:0.8rem; opacity:0.6; display:block; margin-bottom:10px">Enlaces (el primero genera el icono)</label>
     </div>
     <button class="action-btn" style="width:100%; margin: 15px 0; font-size: 0.75rem; justify-content: center;" onclick="addLinkRow()">+ Añadir otro enlace</button>
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
+    <div style="display: flex; gap: 8px; margin-top: 20px;">
         <button class="action-btn" style="flex: 1; background: var(--accent); color: black; justify-content: center;" onclick="saveSite()">Guardar</button>
+        <button id="deleteSiteBtn" class="action-btn" style="background: var(--danger); border-color: var(--danger); justify-content: center; display: none;" onclick="deleteFromModal()">Eliminar</button>
         <button class="action-btn" style="flex: 1; justify-content: center;" onclick="closeAllModals()">Cancelar</button>
     </div>
 </div>
@@ -272,7 +276,6 @@
                 item.innerHTML = `
                     <div class="item-tools">
                         <button class="tool-btn btn-edit" onclick="event.stopPropagation(); openEditModal(${i})">✎</button>
-                        <button class="tool-btn btn-del" onclick="event.stopPropagation(); removeSite(event, ${i})">×</button>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:100%;" onclick="if(${site.links.length} === 1) window.location.href='${primaryUrl}'">
                         <div class="icon-wrapper">
@@ -296,6 +299,7 @@
             new Sortable(document.getElementById('grid'), {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
                 filter: '.no-drag',
                 onEnd: function() {
                     const items = Array.from(document.getElementById('grid').querySelectorAll('.item[data-id]'));
@@ -315,8 +319,27 @@
         container.appendChild(row);
     }
 
-    function openAddModal() { currentEditIndex = null; document.getElementById('siteNameInput').value = ""; document.getElementById('linksContainer').innerHTML = ''; addLinkRow(); document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('siteModal').style.display = 'block'; }
-    function openEditModal(i) { currentEditIndex = i; const site = mySites[i]; document.getElementById('siteNameInput').value = site.name; document.getElementById('linksContainer').innerHTML = ''; site.links.forEach(link => addLinkRow(link.label, link.url)); document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('siteModal').style.display = 'block'; }
+    function openAddModal() { 
+        currentEditIndex = null; 
+        document.getElementById('siteNameInput').value = ""; 
+        document.getElementById('linksContainer').innerHTML = ''; 
+        document.getElementById('deleteSiteBtn').style.display = 'none';
+        addLinkRow(); 
+        document.getElementById('modalOverlay').style.display = 'block'; 
+        document.getElementById('siteModal').style.display = 'block'; 
+    }
+
+    function openEditModal(i) { 
+        currentEditIndex = i; 
+        const site = mySites[i]; 
+        document.getElementById('siteNameInput').value = site.name; 
+        document.getElementById('linksContainer').innerHTML = ''; 
+        document.getElementById('deleteSiteBtn').style.display = 'flex';
+        site.links.forEach(link => addLinkRow(link.label, link.url)); 
+        document.getElementById('modalOverlay').style.display = 'block'; 
+        document.getElementById('siteModal').style.display = 'block'; 
+    }
+
     function saveSite() {
         const name = document.getElementById('siteNameInput').value;
         const labels = document.querySelectorAll('.link-label'), urls = document.querySelectorAll('.link-url');
@@ -328,6 +351,15 @@
         if(!name || links.length === 0) return;
         if(currentEditIndex !== null) mySites[currentEditIndex] = {name, links}; else mySites.push({name, links});
         localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites)); closeAllModals(); render();
+    }
+
+    function deleteFromModal() {
+        if (currentEditIndex !== null && confirm("¿Seguro que quieres eliminar este acceso directo?")) {
+            mySites.splice(currentEditIndex, 1);
+            localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites));
+            closeAllModals();
+            render();
+        }
     }
 
     function applyConfig() {
@@ -486,8 +518,6 @@
             localStorage.setItem('MyDash_WeatherTime', Date.now());
         } catch (e) {} 
     }
-
-    function removeSite(e, i) { e.stopPropagation(); if(confirm("¿Eliminar?")) { mySites.splice(i, 1); localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites)); render(); } }
     
     function updateTime() { 
         const now = new Date(); 
