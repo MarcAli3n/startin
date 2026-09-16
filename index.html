@@ -3,266 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuevo Panel</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <title>START IN</title>
+    <link rel="icon" type="image/x-icon" href="TU_FAVICON.ico">
+
+    <!-- Carga inmediata del fondo guardado sin parpadeo -->
+    <script>
+        (function() {
+            const savedBg = localStorage.getItem('customBg');
+            if (savedBg) {
+                document.write('<style id="bgStyle">body { background-image: url("' + savedBg + '") !important; }</style>');
+            }
+        })();
+    </script>
+    
+    <!-- Carga optimizada de fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
+    <!-- Script de arrastrar diferido -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" defer></script>
+
     <style>
         :root {
-            --bg: #121212;
-            --card-bg: #1e1e1e;
-            --accent: #00e676;
-            --danger: #ff5252;
-            --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent: #00d2ff;
+            --success: #00ff88;
+            --danger: #ff4d4d;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0; 
+            font-family: 'Inter', system-ui, sans-serif; 
+            color: white; 
+            min-height: 100vh;
+            background-color: #0a0a0a;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+            overflow-x: hidden;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-            margin-top: 20px;
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.3); z-index: -1;
         }
 
-        /* Cursor pointer por defecto para la interacción habitual */
-        .item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            text-align: center;
-            padding-bottom: 15px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px 10px;
-            box-sizing: border-box;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
+        header { padding: 15px 50px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .time-container { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        #clock { font-size: 2.2rem; font-weight: 400; line-height: 1; text-shadow: 0 4px 10px rgba(0,0,0,0.5); font-family: 'Orbitron', monospace; }
+        #date { font-size: 0.9rem; opacity: 0.8; margin-top: 4px; text-transform: capitalize; }
+
+        .right-header { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        #weather { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+
+        .anim-glow { animation: glow 2s ease-in-out infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 10px #fff, 0 0 20px var(--accent); } to { text-shadow: 0 0 20px #fff, 0 0 30px var(--accent); } }
+        
+        .anim-float { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .action-btn { 
+            padding: 10px 20px; border-radius: 30px; border: 1px solid var(--glass-border); 
+            background: var(--glass); color: white; cursor: pointer; font-weight: bold; 
+            font-size: 0.85rem; transition: 0.2s; display: flex; align-items: center; gap: 8px;
+            backdrop-filter: blur(15px); box-sizing: border-box; width: auto;
+        }
+        .action-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); border-color: var(--accent); }
+
+        .search-area { display: flex; justify-content: center; margin-bottom: 30px; }
+        .search-wrapper {
+            display: flex; align-items: center; background: var(--glass); 
+            backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
+            border-radius: 50px; padding: 5px 15px; width: 550px; transition: 0.2s;
+        }
+        .search-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 15px rgba(0,210,255,0.2); }
+        .search-engine-select {
+            background: transparent; border: none; color: var(--accent); font-weight: bold;
+            outline: none; cursor: pointer; padding-right: 10px; border-right: 1px solid var(--glass-border);
+        }
+        .search-engine-select option { background: #1a1a1a; color: white; }
+        .search-wrapper input { background: transparent; border: none; color: white; padding: 12px; flex-grow: 1; outline: none; font-size: 1rem; }
+
+        .main-container { width: 95%; max-width: 1450px; margin: 0 auto; padding-bottom: 50px; }
+        #mainTitle { font-size: 4rem; text-align: center; margin: 20px 0; font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+
+        .shortcuts-grid { display: grid; grid-template-columns: repeat(11, minmax(90px, 1fr)); gap: 28px; justify-content: center; width: 100%; box-sizing: border-box; }
+
+        .item { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; text-align: center; padding-bottom: 15px; cursor: grab; }
+        .item:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.3; }
+
+        .dropdown-menu {
+            position: absolute; top: 85%; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 15, 15, 0.98); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            width: 170px; padding: 8px 0; z-index: 1000;
+            display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        
+        .dropdown-menu::before { content: ""; position: absolute; top: -15px; left: 0; width: 100%; height: 15px; }
+        .item:hover .dropdown-menu { display: block; }
+        
+        .dropdown-item {
+            padding: 10px 15px; font-size: 0.85rem; color: white; text-decoration: none;
+            display: block; transition: 0.2s; text-align: left;
+        }
+        .dropdown-item:hover { background: var(--accent); color: black; font-weight: bold; }
+
+        .item-tools { position: absolute; top: -10px; right: 0; display: flex; gap: 5px; opacity: 0; transition: 0.2s; z-index: 100; }
+        .item:hover .item-tools { opacity: 1; }
+
+        .tool-btn { width: 26px; height: 26px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .btn-edit { background: var(--accent); }
+        .btn-del { background: var(--danger); }
+
+        .icon-wrapper { width: 90px; height: 90px; background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 22px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; transition: 0.2s; flex-shrink: 0; pointer-events: none; font-size: 2rem; font-weight: bold; color: var(--accent); overflow: hidden; padding: 0; }
+        .item:hover .icon-wrapper { background: rgba(255,255,255,0.25); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .icon-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; }
+        .item span { font-size: 0.85rem; font-weight: 500; width: 100%; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+
+        #configPanel { 
+            display: none; background: rgba(10,10,10,0.98); backdrop-filter: blur(30px); 
+            padding: 25px; border-radius: 25px 0 0 25px; position: fixed; right: 0; top: 0; bottom: 0; 
+            z-index: 2000; border-left: 1px solid var(--accent); width: 320px; overflow-y: auto; box-sizing: border-box;
         }
 
-        .item:hover {
-            background: #282828;
-            transform: translateY(-2px);
+        .modal { 
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: rgba(15, 15, 15, 0.98); padding: 30px; border-radius: 25px; 
+            border: 1px solid var(--accent); z-index: 3000; width: 400px; max-width: 90%; 
+            max-height: 85vh; overflow-y: auto; box-sizing: border-box;
         }
-
-        /* El cursor de agarre SOLO se activa al arrastrar realmente */
-        .sortable-drag {
-            cursor: grabbing !important;
-        }
-
-        .sortable-ghost {
-            opacity: 0.3;
-        }
-
-        .icon-wrapper {
-            width: 64px;
-            height: 64px;
-            background: #2a2a2a;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            overflow: hidden;
-        }
-
-        .icon-wrapper img {
-            width: 48px;
-            height: 48px;
-            object-fit: contain;
-        }
-
-        .item-tools {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            display: opacity;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .item:hover .item-tools {
-            opacity: 1;
-        }
-
-        .tool-btn {
-            background: rgba(0,0,0,0.6);
-            border: none;
-            color: #fff;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-
-        .tool-btn:hover {
-            background: var(--accent);
-            color: #000;
-        }
-
-        .action-btn {
-            background: #2a2a2a;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s;
-        }
-
-        .action-btn:hover {
-            background: #333;
-        }
-
-        /* Modales */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            z-index: 100;
-        }
-
-        .modal {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--card-bg);
-            padding: 24px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 400px;
-            display: none;
-            z-index: 101;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-
-        .link-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .link-row input {
-            background: #222;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 8px;
-            border-radius: 6px;
-            flex: 1;
-        }
-
-        select {
-            background: #222;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 8px;
-            border-radius: 6px;
-            width: 100%;
-            margin-top: 8px;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2999; }
+        
+        .editor-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9rem; }
+        .editor-row input[type="text"], .editor-row select { background: #222; border: 1px solid #444; color: white; padding: 6px; border-radius: 8px; width: 55%; box-sizing: border-box; }
+        
+        .sub-link-row { display: flex; gap: 5px; margin-bottom: 8px; width: 100%; box-sizing: border-box; }
+        .sub-link-row input { background: #222; border: 1px solid #444; color: white; padding: 8px; border-radius: 6px; font-size: 0.8rem; box-sizing: border-box; }
     </style>
 </head>
-<body>
+<body id="bodyBg">
 
-    <div style="width: 100%; max-width: 1000px; display: flex; justify-content: flex-end; margin-bottom: 10px;">
-        <button class="action-btn" onclick="openAddModal()">+ Añadir Acceso Directo</button>
+<div class="modal-overlay" id="modalOverlay" onclick="closeAllModals()"></div>
+
+<div id="siteModal" class="modal">
+    <h3 id="modalTitle" style="margin-top: 0; color: var(--accent);">Configurar Icono</h3>
+    <div style="margin-bottom:15px">
+        <label style="font-size:0.8rem; opacity:0.6; display:block; margin-bottom:5px">Nombre Principal</label>
+        <input type="text" id="siteNameInput" style="width:100%; background:#222; border:1px solid #444; color:white; padding:10px; border-radius:8px; box-sizing:border-box">
+    </div>
+    <div id="linksContainer">
+        <label style="font-size:0.8rem; opacity:0.6; display:block; margin-bottom:10px">Enlaces (el primero genera el icono)</label>
+    </div>
+    <button class="action-btn" style="width:100%; margin: 15px 0; font-size: 0.75rem; justify-content: center;" onclick="addLinkRow()">+ Añadir otro enlace</button>
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="action-btn" style="flex: 1; background: var(--accent); color: black; justify-content: center;" onclick="saveSite()">Guardar</button>
+        <button class="action-btn" style="flex: 1; justify-content: center;" onclick="closeAllModals()">Cancelar</button>
+    </div>
+</div>
+
+<div id="bgModal" class="modal">
+    <h3 style="margin-top: 0; color: var(--accent);">Personalizar Fondo</h3>
+    <button class="action-btn" style="width:100%; margin-bottom: 12px; justify-content: center; border-color: var(--accent);" onclick="setRandomBackground()">🌌 Fondo Aleatorio</button>
+    <label for="bgInput" class="action-btn" style="width:100%; justify-content: center; cursor:pointer; margin-bottom: 20px; font-size: 0.8rem;">🖼️ Subir mi Propio Fondo</label>
+    <input type="file" id="bgInput" accept="image/*" onchange="changeBackground(this)" style="display:none">
+    <button class="action-btn" style="width:100%; background: #333; justify-content: center;" onclick="closeAllModals()">Volver</button>
+</div>
+
+<header>
+    <div class="time-container">
+        <div id="clock">00:00</div>
+        <div id="date">--</div>
+    </div>
+    <div class="right-header">
+        <div id="weather" style="display: none;"></div>
+        <button class="action-btn" onclick="toggleConfig()"><span>⚙️</span> Personalizar</button>
+    </div>
+</header>
+
+<div id="configPanel">
+    <h3 style="color: var(--accent); margin-top: 0; margin-bottom: 20px;">Ajustes Elite</h3>
+    <div class="editor-row"><span>Título:</span><input type="text" id="inputTitleText" oninput="updateSettings()"></div>
+    
+    <div class="editor-row"><span>Efecto:</span>
+        <select id="selectAnim" onchange="updateSettings()">
+            <option value="anim-glow">Glow Neón</option>
+            <option value="anim-float">Flotante</option>
+            <option value="none">Sin Efecto</option>
+        </select>
+    </div>
+    <div class="editor-row"><span>Color:</span><input type="color" id="inputColor" onchange="updateSettings()" style="width:55%; height:30px; border:none; background:transparent"></div>
+    <div class="editor-row"><span>Filas:</span>
+        <select id="selectRows" onchange="updateSettings()">
+            <option value="1">1 Fila</option><option value="2">2 Filas</option><option value="3">3 Filas</option><option value="4">4 Filas</option><option value="5">5 Filas</option><option value="6">6 Filas</option>
+        </select>
+    </div>
+    <div class="editor-row"><span>Ciudad:</span><input type="text" id="inputCity" placeholder="Ej: Madrid, Tokio..." onchange="updateSettings()"></div>
+    <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
+    <div class="editor-row"><span>Buscador:</span><input type="checkbox" id="checkSearch" onchange="updateSettings()"></div>
+    <div class="editor-row"><span>Clima:</span><input type="checkbox" id="checkWeather" onchange="updateSettings()"></div>
+    <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
+    <button class="action-btn" style="width:100%; margin-bottom: 10px; justify-content: center; border-color: var(--accent);" onclick="openBgModal()">🖼️ Cambiar Fondo</button>
+    <button class="action-btn" style="width:100%; border-color: var(--success); color: var(--success); margin-bottom: 15px; justify-content: center;" onclick="openAddModal()">+ Nuevo Sitio</button>
+    
+    <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+        <button class="action-btn" style="flex: 1; justify-content: center; font-size: 0.75rem;" onclick="exportData()">📥 Exportar</button>
+        <label for="importInput" class="action-btn" style="flex: 1; justify-content: center; font-size: 0.75rem; cursor: pointer;">📤 Importar</label>
+        <input type="file" id="importInput" accept=".json" onchange="importData(this)" style="display:none">
     </div>
 
-    <div id="grid" class="grid"></div>
+    <button class="action-btn" style="width:100%; background: white; color: black; justify-content: center;" onclick="toggleConfig()">GUARDAR</button>
+</div>
 
-    <div id="modalOverlay" class="modal-overlay" onclick="closeAllModals()"></div>
-
-    <!-- Modal de Edición / Creación -->
-    <div id="siteModal" class="modal">
-        <h3 id="modalTitle" style="margin-top: 0; color: var(--accent);">Configurar Icono</h3>
-        
-        <div style="margin-bottom:15px">
-            <label style="font-size:0.8rem; opacity:0.6; display:block; margin-bottom:5px">Nombre Principal</label>
-            <input type="text" id="siteNameInput" style="width:100%; background:#222; border:1px solid #444; color:white; padding:10px; border-radius:8px; box-sizing:border-box">
-        </div>
-
-        <div id="linksContainer">
-            <label style="font-size:0.8rem; opacity:0.6; display:block; margin-bottom:10px">Enlaces (el primero genera el icono)</label>
-        </div>
-
-        <button class="action-btn" style="width:100%; margin: 15px 0; font-size: 0.75rem; justify-content: center;" onclick="addLinkRow()">+ Añadir otro enlace</button>
-        
-        <div style="display: flex; gap: 8px; margin-top: 20px;">
-            <button class="action-btn" style="flex: 1; background: var(--accent); color: black; justify-content: center;" onclick="saveSite()">Guardar</button>
-            <button id="deleteSiteBtn" class="action-btn" style="background: var(--danger); border-color: var(--danger); justify-content: center; display: none;" onclick="deleteFromModal()">Eliminar</button>
-            <button class="action-btn" style="flex: 1; justify-content: center;" onclick="closeAllModals()">Cancelar</button>
+<div class="main-container">
+    <h1 id="mainTitle">START IN</h1>
+    <div class="search-area" id="searchContainer">
+        <div class="search-wrapper">
+            <select id="searchEngine" class="search-engine-select">
+                <option value="https://www.google.com/search?q=">Google</option>
+                <option value="https://www.google.com/maps/search/">Maps</option>
+                <option value="https://www.amazon.es/s?k=">Amazon</option>
+                <option value="https://www.youtube.com/results?search_query=">YouTube</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Buscar..." onkeypress="if(event.key === 'Enter') executeSearch()">
         </div>
     </div>
+    <div class="shortcuts-grid" id="grid"></div>
+</div>
 
-    <script>
-        const STORAGE_SITES = 'my_dashboard_sites';
-        let currentEditIndex = null;
+<script>
+    const STORAGE_SITES = 'MyDash_Sites_V2';
+    const STORAGE_CONFIG = 'MyDash_Config';
+    let currentEditIndex = null;
 
-        let mySites = JSON.parse(localStorage.getItem(STORAGE_SITES)) || [
-            {
-                name: "Google",
-                links: [{ label: "Buscador", url: "https://www.google.com" }]
-            },
-            {
-                name: "YouTube",
-                links: [{ label: "Inicio", url: "https://www.youtube.com" }]
-            }
-        ];
+    let mySites = JSON.parse(localStorage.getItem(STORAGE_SITES)) || [
+        {name: 'Google', links: [{label: 'Google', url: 'https://google.com'}, {label: 'Gmail', url: 'https://gmail.com'}]},
+        {name: 'YouTube', links: [{label: 'YouTube', url: 'https://youtube.com'}]}
+    ];
 
+    let config = JSON.parse(localStorage.getItem(STORAGE_CONFIG)) || { 
+        text: 'START IN', font: "'Orbitron', sans-serif", color: '#ffffff', anim: 'anim-glow', 
+        rows: 2, city: '', showSearch: true, showWeather: true 
+    };
+
+    function render() {
         const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        applyConfig();
+        const totalSlots = config.rows * 11;
+        const fragment = document.createDocumentFragment();
 
-        function saveToStorage() {
-            localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites));
-        }
+        for(let i = 0; i < totalSlots; i++) {
+            const site = mySites[i];
+            const item = document.createElement('div');
+            item.className = 'item';
+            if(site) item.setAttribute('data-id', i);
 
-        function render() {
-            grid.innerHTML = '';
-            mySites.forEach((site, i) => {
-                const item = document.createElement('div');
-                item.className = 'item';
-
-                const primaryUrl = site.links[0]?.url || '#';
-                let domain = '';
-                try {
-                    domain = new URL(primaryUrl).hostname;
-                } catch (e) {
-                    domain = '';
-                }
-
+            if(site) {
+                const primaryUrl = site.links[0].url;
+                let domain = "google.com"; try { domain = new URL(primaryUrl).hostname; } catch(e) {}
+                let dropdownHtml = site.links.length > 1 ? `<div class="dropdown-menu">${site.links.map(link => `<a href="${link.url}" class="dropdown-item">${link.label}</a>`).join('')}</div>` : '';
                 const fallbackLetter = site.name.charAt(0).toUpperCase();
-
-                let dropdownHtml = '';
-                if (site.links.length > 1) {
-                    dropdownHtml = `<select onchange="if(this.value) window.location.href=this.value" onclick="event.stopPropagation()">
-                        <option value="" disabled selected>Opciones...</option>
-                        ${site.links.map(link => `<option value="${link.url}">${link.label}</option>`).join('')}
-                    </select>`;
-                }
 
                 item.innerHTML = `
                     <div class="item-tools">
                         <button class="tool-btn btn-edit" onclick="event.stopPropagation(); openEditModal(${i})">✎</button>
+                        <button class="tool-btn btn-del" onclick="event.stopPropagation(); removeSite(event, ${i})">×</button>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:100%;" onclick="if(${site.links.length} === 1) window.location.href='${primaryUrl}'">
                         <div class="icon-wrapper">
@@ -271,108 +281,225 @@
                         <span>${site.name}</span>
                     </div>
                     ${dropdownHtml}`;
-
-                grid.appendChild(item);
-            });
-        }
-
-        function addLinkRow(label = '', url = '') {
-            const container = document.getElementById('linksContainer');
-            const row = document.createElement('div');
-            row.className = 'link-row';
-            row.innerHTML = `
-                <input type="text" placeholder="Etiqueta" value="${label}" class="link-label">
-                <input type="url" placeholder="https://..." value="${url}" class="link-url">
-                <button class="action-btn" style="padding: 0 10px;" onclick="this.parentElement.remove()">×</button>
-            `;
-            container.appendChild(row);
-        }
-
-        function openAddModal() {
-            currentEditIndex = null;
-            document.getElementById('siteNameInput').value = "";
-            document.getElementById('linksContainer').innerHTML = '';
-            document.getElementById('deleteSiteBtn').style.display = 'none';
-            addLinkRow();
-            document.getElementById('modalOverlay').style.display = 'block';
-            document.getElementById('siteModal').style.display = 'block';
-        }
-
-        function openEditModal(i) {
-            currentEditIndex = i;
-            const site = mySites[i];
-            document.getElementById('siteNameInput').value = site.name;
-            document.getElementById('linksContainer').innerHTML = '';
-            document.getElementById('deleteSiteBtn').style.display = 'flex';
-            site.links.forEach(link => addLinkRow(link.label, link.url));
-            document.getElementById('modalOverlay').style.display = 'block';
-            document.getElementById('siteModal').style.display = 'block';
-        }
-
-        function closeAllModals() {
-            document.getElementById('modalOverlay').style.display = 'none';
-            document.getElementById('siteModal').style.display = 'none';
-        }
-
-        function saveSite() {
-            const name = document.getElementById('siteNameInput').value.trim();
-            const labels = document.querySelectorAll('.link-label');
-            const urls = document.querySelectorAll('.link-url');
-            
-            const links = [];
-            labels.forEach((labelInput, idx) => {
-                const url = urls[idx].value.trim();
-                const label = labelInput.value.trim() || 'Enlace';
-                if (url) links.push({ label, url });
-            });
-
-            if (!name || links.length === 0) {
-                alert('Añade un nombre y al menos un enlace válido.');
-                return;
-            }
-
-            const siteData = { name, links };
-
-            if (currentEditIndex !== null) {
-                mySites[currentEditIndex] = siteData;
             } else {
-                mySites.push(siteData);
+                item.className += ' no-drag';
+                item.innerHTML = `<div style="opacity:0.2; cursor:pointer;" onclick="openAddModal()"><div class="icon-wrapper" style="border-style:dashed">+</div><span>Añadir</span></div>`;
             }
-
-            saveToStorage();
-            closeAllModals();
-            render();
+            fragment.appendChild(item);
         }
+        grid.appendChild(fragment);
+        initSortable();
+    }
 
-        function deleteFromModal() {
-            if (currentEditIndex !== null && confirm("¿Seguro que quieres eliminar este acceso directo?")) {
-                mySites.splice(currentEditIndex, 1);
-                saveToStorage();
-                closeAllModals();
-                render();
-            }
+    function initSortable() {
+        if(typeof Sortable !== 'undefined') {
+            new Sortable(document.getElementById('grid'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                filter: '.no-drag',
+                onEnd: function() {
+                    const items = Array.from(document.getElementById('grid').querySelectorAll('.item[data-id]'));
+                    mySites = items.map(el => mySites[parseInt(el.getAttribute('data-id'))]);
+                    localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites));
+                    render();
+                }
+            });
         }
+    }
 
-        // Inicialización de SortableJS con reordenación drag & drop
-        new Sortable(grid, {
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            dragClass: 'sortable-drag',
-            onEnd: function () {
-                const newSites = [];
-                const items = grid.querySelectorAll('.item');
-                items.forEach(item => {
-                    const name = item.querySelector('span').innerText;
-                    const found = mySites.find(s => s.name === name);
-                    if (found) newSites.push(found);
-                });
-                mySites = newSites;
-                saveToStorage();
-            }
+    function addLinkRow(label = '', url = '') {
+        const container = document.getElementById('linksContainer');
+        const row = document.createElement('div');
+        row.className = 'sub-link-row';
+        row.innerHTML = `<input type="text" placeholder="Nombre" class="link-label" value="${label}" style="width:30%"><input type="text" placeholder="URL" class="link-url" value="${url}" style="width:60%"><button class="tool-btn btn-del" onclick="this.parentElement.remove()" style="width:10%">×</button>`;
+        container.appendChild(row);
+    }
+
+    function openAddModal() { currentEditIndex = null; document.getElementById('siteNameInput').value = ""; document.getElementById('linksContainer').innerHTML = ''; addLinkRow(); document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('siteModal').style.display = 'block'; }
+    function openEditModal(i) { currentEditIndex = i; const site = mySites[i]; document.getElementById('siteNameInput').value = site.name; document.getElementById('linksContainer').innerHTML = ''; site.links.forEach(link => addLinkRow(link.label, link.url)); document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('siteModal').style.display = 'block'; }
+    function saveSite() {
+        const name = document.getElementById('siteNameInput').value;
+        const labels = document.querySelectorAll('.link-label'), urls = document.querySelectorAll('.link-url');
+        let links = [];
+        urls.forEach((urlInput, index) => {
+            let url = urlInput.value;
+            if(url) { if(!url.startsWith('http')) url = 'https://' + url; links.push({label: labels[index].value || name, url: url}); }
         });
+        if(!name || links.length === 0) return;
+        if(currentEditIndex !== null) mySites[currentEditIndex] = {name, links}; else mySites.push({name, links});
+        localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites)); closeAllModals(); render();
+    }
 
-        // Carga inicial
+    function applyConfig() {
+        const t = document.getElementById('mainTitle');
+        t.innerText = config.text; t.style.color = config.color;
+        t.className = config.anim === 'none' ? '' : config.anim;
+        document.getElementById('searchContainer').style.display = config.showSearch ? 'flex' : 'none';
+        document.getElementById('weather').style.display = config.showWeather ? 'block' : 'none';
+        document.getElementById('inputTitleText').value = config.text;
+        document.getElementById('selectAnim').value = config.anim;
+        document.getElementById('selectRows').value = config.rows;
+        document.getElementById('inputCity').value = config.city || '';
+        document.getElementById('checkSearch').checked = config.showSearch;
+        document.getElementById('checkWeather').checked = config.showWeather;
+        document.getElementById('inputColor').value = config.color;
+    }
+
+    function updateSettings() {
+        const previousCity = config.city;
+        config = { ...config,
+            text: document.getElementById('inputTitleText').value,
+            color: document.getElementById('inputColor').value,
+            anim: document.getElementById('selectAnim').value,
+            rows: parseInt(document.getElementById('selectRows').value),
+            city: document.getElementById('inputCity').value.trim(),
+            showSearch: document.getElementById('checkSearch').checked,
+            showWeather: document.getElementById('checkWeather').checked
+        };
+        localStorage.setItem(STORAGE_CONFIG, JSON.stringify(config));
         render();
-    </script>
+        if(previousCity !== config.city) {
+            localStorage.removeItem('MyDash_WeatherData');
+            updateWeather();
+        }
+    }
+
+    function exportData() {
+        const exportObj = { sites: mySites, config: config, customBg: localStorage.getItem('customBg') || null };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "start_in_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click(); downloadAnchor.remove();
+    }
+
+    function importData(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (importedData.sites && importedData.config) {
+                    localStorage.setItem(STORAGE_SITES, JSON.stringify(importedData.sites));
+                    localStorage.setItem(STORAGE_CONFIG, JSON.stringify(importedData.config));
+                    if (importedData.customBg) {
+                        localStorage.setItem('customBg', importedData.customBg);
+                        document.body.style.setProperty('background-image', `url("${importedData.customBg}")`, 'important');
+                    }
+                    mySites = importedData.sites; config = importedData.config;
+                    localStorage.removeItem('MyDash_WeatherData');
+                    render(); updateWeather();
+                    alert("¡Configuración importada!");
+                }
+            } catch (err) { alert("Error en la copia."); }
+        };
+        reader.readAsText(file);
+    }
+
+    function openBgModal() { document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('bgModal').style.display = 'block'; }
+    function closeAllModals() { document.getElementById('modalOverlay').style.display = 'none'; document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+    function toggleConfig() { const p = document.getElementById('configPanel'); p.style.display = (p.style.display === 'block') ? 'none' : 'block'; }
+    
+    function setRandomBackground() { 
+        const url = `https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80&sig=${Math.random()}`; 
+        document.body.style.setProperty('background-image', `url("${url}")`, 'important');
+        let styleTag = document.getElementById('bgStyle');
+        if (styleTag) styleTag.innerHTML = `body { background-image: url("${url}") !important; }`;
+        localStorage.setItem('customBg', url); 
+        closeAllModals(); 
+    }
+
+    function changeBackground(input) { 
+        if (input.files && input.files[0]) { 
+            const reader = new FileReader(); 
+            reader.onload = function(e) { 
+                const bgData = e.target.result;
+                document.body.style.setProperty('background-image', `url("${bgData}")`, 'important');
+                let styleTag = document.getElementById('bgStyle');
+                if (!styleTag) {
+                    styleTag = document.createElement('style');
+                    styleTag.id = 'bgStyle';
+                    document.head.appendChild(styleTag);
+                }
+                styleTag.innerHTML = `body { background-image: url("${bgData}") !important; }`;
+                try {
+                    localStorage.setItem('customBg', bgData);
+                } catch (err) {
+                    alert("No se pudo guardar la imagen en la memoria local. Intenta con una imagen más liviana.");
+                }
+                closeAllModals(); 
+            }; 
+            reader.readAsDataURL(input.files[0]); 
+        } 
+    }
+
+    function executeSearch() { const engine = document.getElementById('searchEngine').value; const query = document.getElementById('searchInput').value; if(query) window.location.href = engine + encodeURIComponent(query); }
+    
+    async function updateWeather() { 
+        if(!config.showWeather) return; 
+
+        const CACHE_KEY = 'MyDash_WeatherData';
+        const CACHE_TIME_KEY = 'MyDash_WeatherTime';
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+        
+        if (cachedData && cachedTime && (Date.now() - cachedTime < 1800000)) {
+            document.getElementById('weather').innerText = cachedData;
+            return;
+        }
+
+        if(config.city) {
+            fetchWeatherByCity(config.city);
+        } else if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    try {
+                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&current_weather=true`);
+                        const data = await res.json();
+                        const weatherText = `MI UBICACIÓN 🌤️ ${Math.round(data.current_weather.temperature)}°C`;
+                        document.getElementById('weather').innerText = weatherText;
+                        localStorage.setItem(CACHE_KEY, weatherText);
+                        localStorage.setItem(CACHE_TIME_KEY, Date.now());
+                    } catch(e) { document.getElementById('weather').innerText = ''; }
+                },
+                () => { document.getElementById('weather').innerText = ''; },
+                { timeout: 2000 }
+            );
+        }
+    }
+
+    async function fetchWeatherByCity(city) {
+        try { 
+            const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=es&format=json`);
+            const geoData = await geoRes.json();
+            if(!geoData.results || geoData.results.length === 0) return;
+
+            const { latitude, longitude, name } = geoData.results[0];
+            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+            const weatherData = await weatherRes.json();
+            
+            const weatherText = `${name.toUpperCase()} 🌤️ ${Math.round(weatherData.current_weather.temperature)}°C`;
+            document.getElementById('weather').innerText = weatherText; 
+            localStorage.setItem('MyDash_WeatherData', weatherText);
+            localStorage.setItem('MyDash_WeatherTime', Date.now());
+        } catch (e) {} 
+    }
+
+    function removeSite(e, i) { e.stopPropagation(); if(confirm("¿Eliminar?")) { mySites.splice(i, 1); localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites)); render(); } }
+    
+    function updateTime() { 
+        const now = new Date(); 
+        document.getElementById('clock').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); 
+        document.getElementById('date').textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }); 
+    }
+
+    updateTime(); 
+    render(); 
+
+    setInterval(updateTime, 1000); 
+    setTimeout(updateWeather, 200);
+</script>
 </body>
 </html>
