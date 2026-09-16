@@ -228,7 +228,6 @@
         {name: 'YouTube', links: [{label: 'YouTube', url: 'https://youtube.com'}]}
     ];
 
-    // Sin ciudad por defecto inicial en el código
     let config = JSON.parse(localStorage.getItem(STORAGE_CONFIG)) || { 
         text: 'START IN', font: "'Orbitron', sans-serif", color: '#ffffff', anim: 'anim-glow', 
         rows: 2, city: '', showSearch: true, showWeather: true 
@@ -259,7 +258,7 @@
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:center; width:100%;" onclick="if(${site.links.length} === 1) window.location.href='${primaryUrl}'">
                         <div class="icon-wrapper">
-                            <img src="https://www.google.com/s2/favicons?sz=128&domain=${domain}" onerror="this.remove(); this.parentElement.innerText='${fallbackLetter}';">
+                            <img src="https://www.google.com/s2/favicons?sz=128&domain=${domain}" loading="lazy" onerror="this.remove(); this.parentElement.innerText='${fallbackLetter}';">
                         </div>
                         <span>${site.name}</span>
                     </div>
@@ -339,10 +338,12 @@
         };
         localStorage.setItem(STORAGE_CONFIG, JSON.stringify(config));
         render();
-        if(previousCity !== config.city) updateWeather();
+        if(previousCity !== config.city) {
+            localStorage.removeItem('MyDash_WeatherData');
+            updateWeather();
+        }
     }
 
-    /* Funciones para Exportar e Importar Ajustes */
     function exportData() {
         const exportObj = {
             sites: mySites,
@@ -374,6 +375,7 @@
                     }
                     mySites = importedData.sites;
                     config = importedData.config;
+                    localStorage.removeItem('MyDash_WeatherData');
                     render();
                     updateWeather();
                     alert("¡Configuración importada con éxito!");
@@ -397,14 +399,20 @@
     async function updateWeather() { 
         if(!config.showWeather) return; 
 
-        // Si el usuario especificó una ciudad manualmente, la usamos directamente
-        if(config.city) {
-            fetchWeatherByCity(config.city);
+        const CACHE_KEY = 'MyDash_WeatherData';
+        const CACHE_TIME_KEY = 'MyDash_WeatherTime';
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+        
+        // Usa la caché local si no han pasado más de 20 minutos (1200000 ms)
+        if (cachedData && cachedTime && (Date.now() - cachedTime < 1200000)) {
+            document.getElementById('weather').innerText = cachedData;
             return;
         }
 
-        // Si no hay ciudad especificada, intenta geolocalizar la posición actual del navegador
-        if (navigator.geolocation) {
+        if(config.city) {
+            fetchWeatherByCity(config.city);
+        } else if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const lat = position.coords.latitude;
@@ -412,15 +420,16 @@
                     try {
                         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                         const weatherData = await weatherRes.json();
-                        document.getElementById('weather').innerText = `MI UBICACIÓN 🌤️ ${Math.round(weatherData.current_weather.temperature)}°C`;
+                        const weatherText = `MI UBICACIÓN 🌤️ ${Math.round(weatherData.current_weather.temperature)}°C`;
+                        document.getElementById('weather').innerText = weatherText;
+                        localStorage.setItem(CACHE_KEY, weatherText);
+                        localStorage.setItem(CACHE_TIME_KEY, Date.now());
                     } catch(e) {
                         document.getElementById('weather').innerText = '';
                     }
                 },
-                () => {
-                    // Si el usuario deniega la geolocalización, simplemente ocultamos el texto
-                    document.getElementById('weather').innerText = '';
-                }
+                () => { document.getElementById('weather').innerText = ''; },
+                { timeout: 3000 }
             );
         } else {
             document.getElementById('weather').innerText = '';
@@ -438,11 +447,13 @@
             }
 
             const { latitude, longitude, name } = geoData.results[0];
-
             const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
             const weatherData = await weatherRes.json();
             
-            document.getElementById('weather').innerText = `${name.toUpperCase()} 🌤️ ${Math.round(weatherData.current_weather.temperature)}°C`; 
+            const weatherText = `${name.toUpperCase()} 🌤️ ${Math.round(weatherData.current_weather.temperature)}°C`;
+            document.getElementById('weather').innerText = weatherText; 
+            localStorage.setItem('MyDash_WeatherData', weatherText);
+            localStorage.setItem('MyDash_WeatherTime', Date.now());
         } catch (e) { 
             document.getElementById('weather').innerText = city.toUpperCase(); 
         } 
@@ -451,8 +462,16 @@
     function removeSite(e, i) { e.stopPropagation(); if(confirm("¿Eliminar?")) { mySites.splice(i, 1); localStorage.setItem(STORAGE_SITES, JSON.stringify(mySites)); render(); } }
     function updateTime() { const now = new Date(); document.getElementById('clock').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); document.getElementById('date').textContent = now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }); }
 
-    const savedBg = localStorage.getItem('customBg'); if(savedBg) document.body.style.backgroundImage = `url(${savedBg})`;
-    setInterval(updateTime, 1000); updateTime(); updateWeather(); render();
+    // Renderizado ultrarrápido inicial
+    const savedBg = localStorage.getItem('customBg'); 
+    if(savedBg) document.body.style.backgroundImage = `url(${savedBg})`;
+
+    updateTime(); 
+    render(); 
+
+    // Tareas diferidas en segundo plano para no bloquear el inicio
+    setInterval(updateTime, 1000); 
+    setTimeout(updateWeather, 100);
 </script>
 </body>
 </html>
